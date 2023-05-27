@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Player {
-    private Team team;
+public class Team {
     private String name;
-    private int runs;
-    private int wickets;
+    private int total;
+    private int extras;
+    private String overs;
 }
