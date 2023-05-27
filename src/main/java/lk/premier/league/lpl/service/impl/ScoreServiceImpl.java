@@ -21,7 +21,6 @@ public class ScoreServiceImpl implements ScoreService {
     private int extraRuns = 0;
     @Override
     public String findPlayerWithMostRuns() {
-        //------------------
         String splitBy = ",";
         String line = null;
         try
@@ -95,8 +94,6 @@ public class ScoreServiceImpl implements ScoreService {
         {
             e.printStackTrace();
         }
-
-        //-----------
         players.sort(Comparator.comparing(Player::getNumberOfRuns));
 
         players.forEach(h-> System.out.println(h.getPlayerName() +" : "+ h.getNumberOfRuns()));
