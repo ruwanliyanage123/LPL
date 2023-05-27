@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Summary {
-    private String winners;
-    private String scoreSummary;
-    private String playerWithMostRuns;
-    private String playerWithMostWickets;
+public class Player {
+    private String teamName;
+    private String playerName;
+    private int numberOfRuns;
+    private int numberOfWickers;
 }
