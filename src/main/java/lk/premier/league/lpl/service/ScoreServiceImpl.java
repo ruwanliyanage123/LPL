@@ -1,8 +1,8 @@
-package lk.premier.league.lpl.service.impl;
+package lk.premier.league.lpl.service;
 
 import lk.premier.league.lpl.model.Player;
 import lk.premier.league.lpl.model.Team;
-import lk.premier.league.lpl.service.api.ScoreService;
+import lk.premier.league.lpl.service.ScoreService;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -17,25 +17,23 @@ import java.util.stream.Collectors;
 
 @Service
 public class ScoreServiceImpl implements ScoreService {
-    private List<Player> batters = new ArrayList<>();
-    private List<Player> bowlers = new ArrayList<>();
-    private Map<String, Team> teams = new HashMap<>();
+    private final List<Player> batters = new ArrayList<>();
+    private final List<Player> bowlers = new ArrayList<>();
+    private final Map<String, Team> teams = new HashMap<>();
 
     public ScoreServiceImpl() {
     }
 
     @Override
-    public String findPlayerWithMostRuns() {
-        createScoreCardForBatters();
+    public String findPlayerWithMostRuns(String path) {
+        createScoreCardForBatters(path);
         batters.sort(Comparator.comparing(Player::getRuns));
-        //batters.forEach(h -> System.out.println(h.getTeam().getName() + " : " + h.getName() + " : " + h.getRuns()));
         return batters.get(batters.size() - 1).getName();
     }
 
     @Override
     public String findPlayerWithMostWickets() {
         bowlers.sort(Comparator.comparing(Player::getWickets));
-        bowlers.forEach(h -> System.out.println(h.getTeam().getName() + " : " + h.getName() + " : " + h.getWickets()));
         return bowlers.get(bowlers.size() - 1).getName();
     }
 
@@ -61,13 +59,65 @@ public class ScoreServiceImpl implements ScoreService {
         return teamASummary + " " + teamBSummary;
     }
 
-    private void createScoreCardForBatters() {
+    @Override
+    public Map<String, String> findFirstTeamBatting() {
+        Map<String, String> score = new HashMap<>();
+        List<Player> bat = batters.stream().filter(batter -> batter.getTeam().getName().equals(teams.get("1").getName())).collect(Collectors.toList());
+        bat.sort(Comparator.comparing(Player::getRuns));
+        bat.stream().map(batter -> {
+                    score.put(batter.getName(), String.valueOf(batter.getRuns()));
+                    return batter;
+                }
+        ).collect(Collectors.toList());
+        return score;
+    }
+
+    @Override
+    public Map<String, String> findSecondTeamBatting() {
+        Map<String, String> score = new HashMap<>();
+        List<Player> bat = batters.stream().filter(batter -> batter.getTeam().getName().equals(teams.get("2").getName())).collect(Collectors.toList());
+        bat.sort(Comparator.comparing(Player::getRuns));
+        bat.stream().map(batter -> {
+                    score.put(batter.getName(), String.valueOf(batter.getRuns()));
+                    return batter;
+                }
+        ).collect(Collectors.toList());
+        return score;
+    }
+
+    @Override
+    public Map<String, String> findSecondTeamBowling() {
+        Map<String, String> score = new HashMap<>();
+        List<Player> bowl = bowlers.stream().filter(batter -> batter.getTeam().getName().equals(teams.get("1").getName())).collect(Collectors.toList());
+        bowl.sort(Comparator.comparing(Player::getWickets));
+        bowl.stream().map(bowler -> {
+                    score.put(bowler.getName(), String.valueOf(bowler.getWickets()));
+                    return bowler;
+                }
+        ).collect(Collectors.toList());
+        return score;
+    }
+
+    @Override
+    public Map<String, String> findFirstTeamBowling() {
+        Map<String, String> score = new HashMap<>();
+        List<Player> bowl = bowlers.stream().filter(batter -> batter.getTeam().getName().equals(teams.get("2").getName())).collect(Collectors.toList());
+        bowl.sort(Comparator.comparing(Player::getWickets));
+        bowl.stream().map(bowler -> {
+                    score.put(bowler.getName(), String.valueOf(bowler.getWickets()));
+                    return bowler;
+                }
+        ).collect(Collectors.toList());
+        return score;
+    }
+
+    private void createScoreCardForBatters(String path) {
         String splitBy = ",";
-        String line = null;
+        String line;
         try {
             int rowNumber = 0;
             Team teamBat = null;
-            Team teamBowl = null;
+            Team teamBowl;
             BufferedReader br = new BufferedReader(new FileReader("/Users/ruwan/Documents/PROJECT/lpl/src/main/resources/data/match_result.csv"));
             while ((line = br.readLine()) != null) {
                 if (rowNumber != 0) {//to ignore the title related row in the .csv file
@@ -77,7 +127,6 @@ public class ScoreServiceImpl implements ScoreService {
                     String overs = record[1];
                     int runs = Integer.parseInt(record[6]);
                     int extraRuns = Integer.parseInt(record[7]);
-
                     //bowling
                     String bowler = record[5];
                     String inning = record[0];
@@ -85,7 +134,6 @@ public class ScoreServiceImpl implements ScoreService {
                     if (13 <= record.length) {
                         wicket = record[12];
                     }
-                    //todo: there may be a multiple players with same name, the will be a problem need to fix it
                     if (isNotBatted(batters, striker)) {
                         //need to add the two teams to a map
                         if (!teams.containsKey(inning)) {
@@ -105,7 +153,6 @@ public class ScoreServiceImpl implements ScoreService {
                         Player batter = batters.stream().filter(player -> player.getName().equals(striker)).collect(Collectors.toList()).get(0);
                         batter.setRuns(batter.getRuns() + runs);
                     }
-
                     //bowling
                     if (isNotBowled(bowlers, bowler)) {
                         teamBowl = new Team();
@@ -119,7 +166,6 @@ public class ScoreServiceImpl implements ScoreService {
                         player.setName(bowler);
                         bowlers.add(player);
                     }
-
                     if (wicket != null && !wicket.isEmpty() && !wicket.equalsIgnoreCase("run out")) {
                         Player bowl = bowlers.stream().filter(player -> player.getName().equals(bowler)).collect(Collectors.toList()).get(0);
                         bowl.setWickets(bowl.getWickets() + 1);

@@ -5,13 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Summary {
-    private String winners;
-    private String scoreSummary;
-    private String playerWithMostRuns;
-    private String playerWithMostWickets;
+    private String winner;
+    private String mostRuns;
+    private String mostWickets;
+    private Map<String, Map<String, String>> scoreCard;
+    private String summary;
 }
